@@ -67,19 +67,6 @@ class LogPolymander():
             self.fbck_voltage_data[i, :] = data[i][2+3*self.num_motors:2+4*self.num_motors]
             self.goal_torque_body_data[i, :] = data[i][2+4*self.num_motors:2+4*self.num_motors+self.num_body_motors]
 
-    def downsampling(self, new_size):
-        indexes = []
-        old_size = np.shape(self.t_s)[0]
-        i = 0
-        while i < new_size:
-            new_value = random.randint(45, old_size-1)
-            if new_value not in indexes:
-                indexes.append(new_value)
-                i += 1
-        indexes.sort()
-        self.fbck_current_data = self.fbck_current_data[indexes]
-        self.t_s = self.t_s[indexes]
-
     def plot_goal_position(self):
         self.plot_limbs(self.goal_position_data, self.goal_position_headers)
         #self.plot_spine(self.goal_position_data, self.goal_position_headers)

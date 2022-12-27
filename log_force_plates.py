@@ -33,8 +33,8 @@ class LogForcePlates():
     def cut_signal(self, delay, recording_time):
         start_recording = delay
         end_recording = delay + round(recording_time, 2)
-        self.Fxyz = self.Fxyz[np.where(self.t_s == start_recording)[0][0]:np.where(self.t_s == end_recording)[0][0], :]
-        self.t_s = self.t_s[np.where(self.t_s == start_recording)[0][0]:np.where(self.t_s == end_recording)[0][0]]
+        self.Fxyz = self.Fxyz[int(delay):, :]
+        self.t_s = self.t_s[int(delay):]
 
     def filtering_signal(self, sigma=6):
         for i in range(3):

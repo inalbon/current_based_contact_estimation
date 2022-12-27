@@ -17,16 +17,6 @@ for (i, j) in zip(data_polymander.list_polymander, data_force_plate.list_force_p
     # Resampling force plate signal
     j.resample(len(i.fbck_current_data))
     j.plot_log()
-    plt.figure()
-
-    #plt.plot(i.t_s, i.goal_position_data[:, 8], label=i.goal_position_headers[8])
-    plt.plot(i.t_s, i.fbck_position_data[:, 8], label=i.fbck_position_headers[8])
-    plt.legend()
-    #plt.figure()
-    #plt.plot(i.t_s, i.goal_position_data[:, 9], label=i.goal_position_headers[9])
-    plt.plot(i.t_s, i.fbck_position_data[:, 9], label=i.fbck_position_headers[9])
-    plt.legend()
-    j.plot_log()
     # Filter force plate signal ???????????? WHY DOES IT SET NEGATIVE VALUE TO ZERO ???????????????
     j.filtering_signal()
     j.plot_log()
@@ -34,18 +24,30 @@ for (i, j) in zip(data_polymander.list_polymander, data_force_plate.list_force_p
     # Find peaks in force plate
     peaks, _ = signal.find_peaks(j.Fxyz[:, 2], prominence=1, width=100)  # or height=4, distance=200
     plt.figure()
-    plt.plot(j.Fxyz[:, 2], label=j.)
+    plt.plot(j.Fxyz[:, 2], label=j.headers[2])
     plt.plot(peaks, j.Fxyz[peaks, 2], "x")
-    print('Fz peaks =', peaks[0:4])
+    #print('Fz peaks =', peaks[0:4])
 
     # Find minima in roll motor (when the limb touch the force plate)
-    minima, _ = signal.find_peaks(-i.fbck_position_data[:, 9], width=100)
+    minima, _ = signal.find_peaks(-i.fbck_position_data[:, 9], prominence=-0.5, width=100, distance=100)
     plt.plot(i.fbck_position_data[:, 9], label=i.fbck_position_headers[9])
     plt.plot(minima, i.fbck_position_data[minima, 9], "x")
     plt.legend()
-    print('Fbck pos. minima =', minima[0:4])
-    for k in [0, 1, 2, 3]:
-        print('Delay =', i.t_s[peaks[k]]-i.t_s[minima[k]])
+    #print('Fbck pos. minima =', minima[0:4])
+
+    offset = 0
+    for k in range(4):
+        offset += (peaks[k]-minima[k])/4
+    print('Average delay in steps =', offset)
+
+    # Cut signal
+    j.cut_signal(offset, 30)
+    j.plot_log()
+    plt.figure()
+    plt.plot(j.Fxyz[:, 2], label=j.headers[2])
+    plt.plot(i.fbck_position_data[:, 9], label=i.fbck_position_headers[9])
+
+
 
 # # training
 # X = data_polymander.list_polymander[0].fbck_current_data[:, 8:10]
