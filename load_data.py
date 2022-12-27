@@ -5,7 +5,7 @@ from log_polymander import LogPolymander
 
 
 class LoadData():
-    # load folder load all files of a folder and store them in a list
+    # load files in a folder and store them in a list
     def __init__(self, dir_name):
         self.list_polymander = []
         self.list_force_plates = []

@@ -100,9 +100,16 @@ class LogPolymander():
     def plot_goal_body_torque(self):
         self.plot_spine(self.goal_torque_body_data, self.goal_torque_body_headers)
 
+    def plot_position_vs_current(self, i):
+        fig, ax = plt.subplots()
+        fig.suptitle(self.log_name)
+        ax.plot(self.t_s, self.fbck_position_data[:, i], label=self.fbck_position_headers[i])
+        ax.plot(self.t_s, self.fbck_current_data[:, i]*1e-3, label=self.fbck_current_headers[i])
+        ax.legend()
+
     def plot_limbs(self, data, headers):
         # plot limbs joints (motors ID: 9-16)
-        fig, axs = plt.subplots(2, 2)
+        fig, axs = plt.subplots(2, 2, sharex=True, sharey=True)
         fig.suptitle(self.log_name)
         for i in [8, 9]:
             axs[0, 0].plot(self.t_s, data[:, i], label=headers[i])

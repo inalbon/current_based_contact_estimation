@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
+from scipy import signal
 from scipy.ndimage import gaussian_filter1d
 
 
@@ -39,7 +40,16 @@ class LogForcePlates():
         for i in range(3):
             self.Fxyz[:, i] = gaussian_filter1d(self.Fxyz[:, i], sigma=sigma)
 
+    def resample(self, num):
+        self.t_s = signal.resample(self.t_s, num)
+
+        temp_Fxyz = np.zeros((num, 3))
+        for i in range(3):
+            temp_Fxyz[:, i] = signal.resample(self.Fxyz[:, i], num)
+        self.Fxyz = temp_Fxyz
+
     def plot_log(self):
+        plt.figure()
         for i in range(3):
             plt.plot(self.t_s, self.Fxyz[:, i], label=self.headers[i+1])
 
