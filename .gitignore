@@ -131,6 +131,8 @@ dmypy.json
 # Data
 *.csv
 *.txt
+*.mp4
+*.MOV
 
 # Folders
 logs_force_plates
