@@ -32,21 +32,28 @@ class LogForcePlates():
 
     def cut_signal(self, delay, recording_time):
         start_recording = delay
-        end_recording = delay + round(recording_time, 2)
-        self.Fxyz = self.Fxyz[int(delay):, :]
-        self.t_s = self.t_s[int(delay):]
+        end_recording = delay + recording_time
+        self.Fxyz = self.Fxyz[int(start_recording):int(end_recording), :]
+        self.t_s = self.t_s[int(delay):int(end_recording)]
 
     def filtering_signal(self, sigma=6):
         for i in range(3):
             self.Fxyz[:, i] = gaussian_filter1d(self.Fxyz[:, i], sigma=sigma)
 
-    def resample(self, num):
-        self.t_s = signal.resample(self.t_s, num)
+    def resample(self, t_poly):
+        #print(f'Recording time of robot: [{t_poly[0]}, {t_poly[-1]}]')
+        #print(f'Recording time of force plate: [{self.t_s[0]}, {self.t_s[-1]}]')
 
-        temp_Fxyz = np.zeros((num, 3))
-        for i in range(3):
-            temp_Fxyz[:, i] = signal.resample(self.Fxyz[:, i], num)
-        self.Fxyz = temp_Fxyz
+        # Find number of samples in 60 s in robot data
+        index = 0
+        for _ in t_poly:
+            if t_poly[index] >= self.t_s[-1]:
+                nb_steps = index + 1
+                break
+            index += 1
+        #print(f'Recording time of robot when cut: [{self.t_s[0]}, {t_poly[nb_steps - 1]}]')
+
+        self.Fxyz, self.t_s = signal.resample(self.Fxyz, nb_steps, self.t_s)
 
     def plot_log(self):
         plt.figure()

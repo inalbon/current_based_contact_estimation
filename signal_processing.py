@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from load_data import LoadData
 from sklearn import linear_model
 from scipy import signal
+import numpy as np
 
 # load polymander data
 data_polymander = LoadData(dir_name='logs_polymander/one_limb/FL/amp_0.35_freq_0.5')
@@ -14,13 +15,20 @@ data_force_plate.load_force_plates_data('exp1_amp_0.35_freq_0.5')  # train
 data_force_plate.load_force_plates_data('exp2_amp_0.35_freq_0.5')  # test
 
 for (i, j) in zip(data_polymander.list_polymander, data_force_plate.list_force_plates):
-    # Resampling force plate signal
-    j.resample(len(i.fbck_current_data))
     j.plot_log()
-    # Filter force plate signal ???????????? WHY DOES IT SET NEGATIVE VALUE TO ZERO ???????????????
+    # 1) Resampling force plate signal based on polymander signal
+    j.resample(i.t_s)
+    j.plot_log()
+
+    #print('test', i.t_s[340:346], i.t_s[len(j.t_s)])
+    #print('test', j.t_s[340:346], j.t_s[-1])
+
+    # 2) Filter force plate signal
     j.filtering_signal()
     j.plot_log()
 
+    # 3) Manage delay
+    # Detect initial sequence (4 steps on the force plate)
     # Find peaks in force plate
     peaks, _ = signal.find_peaks(j.Fxyz[:, 2], prominence=1, width=100)  # or height=4, distance=200
     plt.figure()
@@ -41,11 +49,14 @@ for (i, j) in zip(data_polymander.list_polymander, data_force_plate.list_force_p
     print('Average delay in steps =', offset)
 
     # Cut signal
-    j.cut_signal(offset, 30)
+    j.cut_signal(offset, len(i.fbck_position_data))
     j.plot_log()
     plt.figure()
     plt.plot(j.Fxyz[:, 2], label=j.headers[2])
     plt.plot(i.fbck_position_data[:, 9], label=i.fbck_position_headers[9])
+    plt.vlines(peaks, 0, max(i.fbck_position_data[:, 9]), label=['1', '2', '3', '4'])
+    plt.legend()
+    print(len(i.fbck_position_data[:, 9]), len(j.Fxyz[:, 2]))
 
 
 
