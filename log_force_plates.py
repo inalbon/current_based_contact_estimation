@@ -30,15 +30,14 @@ class LogForcePlates():
             self.t_s[i] = data[i][0]
             self.Fxyz[i, :] = data[i][1:4]
 
-    def cut_signal(self, delay, recording_time):
-        start_recording = delay
-        end_recording = delay + recording_time
-        self.Fxyz = self.Fxyz[int(start_recording):int(end_recording), :]
-        self.t_s = self.t_s[int(delay):int(end_recording)]
+    def cut_signal(self, start, end):
+        start = int(start)
+        end = int(end)
+        self.Fxyz = self.Fxyz[start:end, :]
+        self.t_s = self.t_s[start:end]
 
     def filtering_signal(self, sigma=6):
-        for i in range(3):
-            self.Fxyz[:, i] = gaussian_filter1d(self.Fxyz[:, i], sigma=sigma)
+        self.Fxyz = gaussian_filter1d(self.Fxyz, sigma=sigma, axis=0)
 
     def resample(self, t_poly):
         #print(f'Recording time of robot: [{t_poly[0]}, {t_poly[-1]}]')
@@ -54,6 +53,17 @@ class LogForcePlates():
         #print(f'Recording time of robot when cut: [{self.t_s[0]}, {t_poly[nb_steps - 1]}]')
 
         self.Fxyz, self.t_s = signal.resample(self.Fxyz, nb_steps, self.t_s)
+
+    def detect_initial_sequence(self, plot=False):
+        # Detect initial sequence (4 steps on the force plate)
+        # Find peaks in force plate
+        peaks, _ = signal.find_peaks(self.Fxyz[:, 2], prominence=1, width=100)  # or height=4, distance=200
+        if plot:
+            plt.figure()
+            plt.plot(self.Fxyz[:, 2], label=self.headers[2])
+            plt.plot(peaks, self.Fxyz[peaks, 2], "x")
+        # print('Fz peaks =', peaks[0:4])
+        return peaks[0:4]
 
     def plot_log(self):
         plt.figure()

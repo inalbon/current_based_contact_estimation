@@ -1,6 +1,7 @@
 import numpy as np
 import csv
 import matplotlib.pyplot as plt
+from scipy import signal
 import random
 
 
@@ -66,6 +67,26 @@ class LogPolymander():
             self.fbck_current_data[i, :] = data[i][2+2*self.num_motors:2+3*self.num_motors]
             self.fbck_voltage_data[i, :] = data[i][2+3*self.num_motors:2+4*self.num_motors]
             self.goal_torque_body_data[i, :] = data[i][2+4*self.num_motors:2+4*self.num_motors+self.num_body_motors]
+
+    def cut_signal(self, start, end):
+        start = int(start)
+        end = int(end)
+        self.t_s = self.t_s[start:end]
+        self.goal_position_data = self.goal_position_data[start:end, :]
+        self.fbck_position_data = self.fbck_position_data[start:end, :]
+        self.fbck_current_data = self.fbck_current_data[start:end, :]
+        self.fbck_voltage_data = self.fbck_voltage_data[start:end, :]
+        self.goal_torque_body_data = self.goal_torque_body_data[start:end, :]
+
+    def detect_initial_sequence(self, plot=False):
+        minima, _ = signal.find_peaks(-self.fbck_position_data[:, 9], prominence=-0.5, width=100, distance=100)
+        if plot:
+            plt.figure()
+            plt.plot(self.fbck_position_data[:, 9], label=self.fbck_position_headers[9])
+            plt.plot(minima, self.fbck_position_data[minima, 9], "x")
+            plt.legend()
+        # print('Fbck pos. minima =', minima[0:4])
+        return minima
 
     def plot_goal_position(self):
         self.plot_limbs(self.goal_position_data, self.goal_position_headers)
