@@ -22,22 +22,26 @@ snr = 20*np.log10(signal/noise)  # dB
 print('SNR =', snr)
 
 for (i, j) in zip(data_polymander.list_polymander, data_force_plate.list_force_plates):
+    i.plot_fbck_current()
     j.plot_log()
     plt.savefig('figures/Fxyz_raw.eps', format='eps')
     # 1) Resampling force plate signal based on polymander signal
     j.resample(i.t_s)
 
-    # 2) Filter force plate signal
+    # 2) Filter signal
+    #i.filtering_signal()
     j.filtering_signal()
+    #i.plot_fbck_current()
     j.plot_log()
+    plt.savefig('figures/fbck_current_sigma_6', format='eps')
     plt.savefig('figures/Fxyz_sigma_6.eps', format='eps')
 
     # 3) Manage delay
     # 3.1) Detect initial sequence (4 steps)
     # Find minima in roll motor (when the limb touch the force plate)
-    minima = i.detect_initial_sequence(True)
+    minima = i.detect_initial_sequence(False)
     # Find peaks in force plate (when the limb touch the force plate)
-    peaks = j.detect_initial_sequence(True)
+    peaks = j.detect_initial_sequence(False)
 
     offset = []
     for k in range(4):
@@ -47,9 +51,9 @@ for (i, j) in zip(data_polymander.list_polymander, data_force_plate.list_force_p
     # 3.2) Cut signal to ensure that both signals are aligned according to the peaks
     j.cut_signal(offset, offset+len(i.t_s))  # remove first seconds in force plate signal
     i.cut_signal(0, len(j.t_s))  # remove extra seconds in polymander
-    print(i.t_s[0], j.t_s[0], i.t_s[-1], j.t_s[-1])
-    j.plot_log()
-    minima = i.detect_initial_sequence(True)
+    j.t_s = i.t_s  # adjust force plate time on polymander time
+
+    minima = i.detect_initial_sequence(False)
     fig, ax = plt.subplots()
     ax.set_title(j.log_name)
     ax.set(xlabel='time [s]')
@@ -87,5 +91,23 @@ plt.title('Fz prediction')
 plt.plot(data_polymander.list_polymander[1].t_s, y_test, label='true value')
 plt.plot(data_polymander.list_polymander[1].t_s, y_pred, label='pred')
 plt.legend()
+
+# Machine Learning - linear regression
+x = np.absolute(X[:, 0])
+print('x', np.shape(X[:, 0]))
+print('y', np.shape(y))
+slope, intercept, r, p, std_err = stats.linregress(x, y)
+
+
+def myfunc(x):
+    return slope * x + intercept
+
+
+mymodel = list(map(myfunc, x))
+plt.figure()
+plt.xlabel('Feedback current [mA]')
+plt.ylabel('Fz [N]')
+plt.scatter(x, y)
+plt.plot(X[:, 0], mymodel)
 
 plt.show()

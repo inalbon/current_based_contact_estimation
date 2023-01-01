@@ -2,6 +2,7 @@ import numpy as np
 import csv
 import matplotlib.pyplot as plt
 from scipy import signal
+from scipy.ndimage import gaussian_filter1d
 import random
 
 
@@ -67,6 +68,14 @@ class LogPolymander():
             self.fbck_current_data[i, :] = data[i][2+2*self.num_motors:2+3*self.num_motors]
             self.fbck_voltage_data[i, :] = data[i][2+3*self.num_motors:2+4*self.num_motors]
             self.goal_torque_body_data[i, :] = data[i][2+4*self.num_motors:2+4*self.num_motors+self.num_body_motors]
+
+    def filtering_signal(self, sigma=6):
+        self.goal_position_data = gaussian_filter1d(self.goal_position_data, sigma=sigma, axis=0)
+        self.fbck_position_data = gaussian_filter1d(self.fbck_position_data, sigma=sigma, axis=0)
+        self.fbck_current_data = gaussian_filter1d(self.fbck_current_data, sigma=sigma, axis=0)
+        self.fbck_voltage_data = gaussian_filter1d(self.fbck_voltage_data, sigma=sigma, axis=0)
+        self.goal_torque_body_data = gaussian_filter1d(self.goal_torque_body_data, sigma=sigma, axis=0)
+
 
     def cut_signal(self, start, end):
         start = int(start)
