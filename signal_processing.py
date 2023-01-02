@@ -70,21 +70,19 @@ for (i, j) in zip(data_polymander.list_polymander, data_force_plate.list_force_p
     j.plot_log()
 
 # training
-X = data_polymander.list_polymander[0].fbck_current_data[:, 8:10]
-y = data_force_plate.list_force_plates[0].Fxyz[:, 2]
+X_train = data_polymander.list_polymander[0].fbck_current_data[:, 8:10]
+y_train = data_force_plate.list_force_plates[0].Fxyz[:, 2]
 
-# prediction
-X_pred = data_polymander.list_polymander[1].fbck_current_data[:, 8:10]
-
-# true value
+# testing
+X_test = data_polymander.list_polymander[1].fbck_current_data[:, 8:10]
 y_test = data_force_plate.list_force_plates[1].Fxyz[:, 2]
 
 # Machine Learning - multiple regression
 regr = linear_model.LinearRegression()
-model = regr.fit(X, y.reshape(-1, 1))
-print(model.score(X, y.reshape(-1, 1)))
+model = regr.fit(X_train, y_train.reshape(-1, 1))
+print(model.score(X_train, y_train.reshape(-1, 1)))
 
-y_pred = regr.predict(X_pred)
+y_pred = regr.predict(X_test)
 
 plt.figure()
 plt.title('Fz prediction')
@@ -93,10 +91,8 @@ plt.plot(data_polymander.list_polymander[1].t_s, y_pred, label='pred')
 plt.legend()
 
 # Machine Learning - linear regression
-x = np.absolute(X[:, 0])
-print('x', np.shape(X[:, 0]))
-print('y', np.shape(y))
-slope, intercept, r, p, std_err = stats.linregress(x, y)
+x = np.absolute(X_train[:, 0])
+slope, intercept, r, p, std_err = stats.linregress(x, y_train)
 
 
 def myfunc(x):
@@ -107,7 +103,7 @@ mymodel = list(map(myfunc, x))
 plt.figure()
 plt.xlabel('Feedback current [mA]')
 plt.ylabel('Fz [N]')
-plt.scatter(x, y)
-plt.plot(X[:, 0], mymodel)
+plt.scatter(x, y_train)
+plt.plot(X_train[:, 0], mymodel)
 
 plt.show()
