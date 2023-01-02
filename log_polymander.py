@@ -3,7 +3,7 @@ import csv
 import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.ndimage import gaussian_filter1d
-import random
+import pandas as pd
 
 
 class LogPolymander():
@@ -26,48 +26,33 @@ class LogPolymander():
         self.parse_log()
 
     def parse_log(self):
-        with open(f'{self.dir_path}/{self.log_name}') as csvfile:
-            csvreader = csv.reader(csvfile, delimiter=',')
-            data_with_header = list(csvreader)
-
         # load parameters of polymander
-        headers_params = data_with_header[0]
-        data_params = data_with_header[1]
+        params = pd.read_csv(f'{self.dir_path}/{self.log_name}', nrows=1)
         print('-----------Parameters of polymander-------------')
-        i = 0
-        for _ in headers_params:
-            print(_, '=', data_params[i])
-            i += 1
-        print('------------------------------------------------')
-
-        headers = data_with_header[2]
-        data = data_with_header[3:]
-        num_samples = len(data)
+        print(params)
 
         # load time [s], goal position [rad], feedback position [rad], feedback current [mA],
         # feedback voltage [V] and goal torque body [mA] of polymander motors
+        df = pd.read_csv(f'{self.dir_path}/{self.log_name}', skiprows=2, dtype='float64')
+        num_samples = df.shape[0]
 
         # load headers
-        self.goal_position_headers = headers[2:2+self.num_motors]
-        self.fbck_position_headers = headers[2+self.num_motors:2+2*self.num_motors]
-        self.fbck_current_headers = headers[2+2*self.num_motors:2+3*self.num_motors]
-        self.fbck_voltage_headers = headers[2+3*self.num_motors:2+4*self.num_motors]
-        self.goal_torque_body_headers = headers[2+4*self.num_motors:2+4*self.num_motors+self.num_body_motors]
+        self.goal_position_headers = df.columns[2:2+self.num_motors]
+        self.fbck_position_headers = df.columns[2+self.num_motors:2+2*self.num_motors]
+        self.fbck_current_headers = df.columns[2+2*self.num_motors:2+3*self.num_motors]
+        self.fbck_voltage_headers = df.columns[2+3*self.num_motors:2+4*self.num_motors]
+        self.goal_torque_body_headers = df.columns[2+4*self.num_motors:2+4*self.num_motors+self.num_body_motors]
 
         # load data
         self.t_s = np.zeros(num_samples)
-        self.goal_position_data = np.zeros((num_samples, self.num_motors))
-        self.fbck_position_data = np.zeros((num_samples, self.num_motors))
-        self.fbck_current_data = np.zeros((num_samples, self.num_motors))
-        self.fbck_voltage_data = np.zeros((num_samples, self.num_motors))
-        self.goal_torque_body_data = np.zeros((num_samples, self.num_body_motors))
+        self.goal_position_data = df.values[:, 2:2+self.num_motors]
+        self.fbck_position_data = df.values[:, 2+self.num_motors:2+2*self.num_motors]
+        self.fbck_current_data = df.values[:, 2+2*self.num_motors:2+3*self.num_motors]
+        self.fbck_voltage_data = df.values[:, 2+3*self.num_motors:2+4*self.num_motors]
+        self.goal_torque_body_data = df.values[:, 2+4*self.num_motors:2+4*self.num_motors+self.num_body_motors]
         for i in range(num_samples):
-            self.t_s[i] = float(data[i][0]) - float(data[0][0]) + (float(data[i][1]) - float(data[0][1]))*1e-6
-            self.goal_position_data[i, :] = data[i][2:2+self.num_motors]
-            self.fbck_position_data[i, :] = data[i][2+self.num_motors:2+2*self.num_motors]
-            self.fbck_current_data[i, :] = data[i][2+2*self.num_motors:2+3*self.num_motors]
-            self.fbck_voltage_data[i, :] = data[i][2+3*self.num_motors:2+4*self.num_motors]
-            self.goal_torque_body_data[i, :] = data[i][2+4*self.num_motors:2+4*self.num_motors+self.num_body_motors]
+            self.t_s[i] = df.values[i][0] - df.values[0][0]\
+                          + (df.values[i][1] - df.values[0][1])*1e-6
 
     def filtering_signal(self, sigma=6):
         self.goal_position_data = gaussian_filter1d(self.goal_position_data, sigma=sigma, axis=0)

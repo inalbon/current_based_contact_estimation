@@ -3,6 +3,7 @@ import csv
 import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.ndimage import gaussian_filter1d
+import pandas as pd
 
 
 class LogForcePlates():
@@ -15,20 +16,13 @@ class LogForcePlates():
         self.parse_log()
 
     def parse_log(self):
-        with open(f'{self.dir_path}/{self.log_name}') as csvfile:
-            csvreader = csv.reader(csvfile, delimiter='\t')
-            data_with_header = list(csvreader)
-
-        self.headers = data_with_header[17]
-        data = data_with_header[19:]
-        num_samples = len(data)
+        lines_to_skip = [i for i in range(19) if i != 17]
+        df = pd.read_csv(f'{self.dir_path}/{self.log_name}', delimiter='\t', skiprows=lines_to_skip, dtype='float64')
 
         # load time [s] and Forces [N] in x, y and z direction
-        self.t_s = np.zeros(num_samples)
-        self.Fxyz = np.zeros((num_samples, 3))
-        for i in range(num_samples):
-            self.t_s[i] = data[i][0]
-            self.Fxyz[i, :] = data[i][1:4]
+        self.headers = df.columns
+        self.t_s = df.values[:, 0]
+        self.Fxyz = df.values[:, 1:4]
 
     def cut_signal(self, start, end):
         start = int(start)
