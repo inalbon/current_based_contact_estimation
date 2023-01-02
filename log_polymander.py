@@ -23,6 +23,7 @@ class LogPolymander():
         self.goal_torque_body_headers = None
         self.num_motors = 16
         self.num_body_motors = 8
+
         self.parse_log()
 
     def parse_log(self):

@@ -6,14 +6,13 @@ from scipy import stats
 import numpy as np
 
 # load polymander data
-data_polymander = LoadData(dir_name='logs_polymander/one_limb/FL/amp_0.5_freq_0.5')
-data_polymander.load_polymander_data('robot_data_log_2022-12-23_18_44_50')  # train
-data_polymander.load_polymander_data('robot_data_log_2022-12-23_18_47_54')  # test
+data = LoadData()
+data.load_polymander_data(dir_name='logs_polymander/one_limb/FL/amp_0.5_freq_0.5', log_name='robot_data_log_2022-12-23_18_44_50')  # train
+data.load_polymander_data(dir_name='logs_polymander/one_limb/FL/amp_0.5_freq_0.5', log_name='robot_data_log_2022-12-23_18_47_54')  # test
 
 # load force plate data
-data_force_plate = LoadData(dir_name='logs_force_plates/one_limb/FL/amp_0.5_freq_0.5')
-data_force_plate.load_force_plates_data('exp1_amp_0.5_freq_0.5')  # train
-data_force_plate.load_force_plates_data('exp2_amp_0.5_freq_0.5')  # test
+data.load_force_plates_data(dir_name='logs_force_plates/one_limb/FL/amp_0.5_freq_0.5', log_name='exp1_amp_0.5_freq_0.5')  # train
+data.load_force_plates_data(dir_name='logs_force_plates/one_limb/FL/amp_0.5_freq_0.5', log_name='exp2_amp_0.5_freq_0.5')  # test
 
 # estimation of signal-to-noise ratio of force plate
 noise = 2
@@ -21,7 +20,7 @@ signal = 6
 snr = 20*np.log10(signal/noise)  # dB
 print('SNR =', snr)
 
-for (i, j) in zip(data_polymander.list_polymander, data_force_plate.list_force_plates):
+for (i, j) in zip(data.list_polymander, data.list_force_plates):
     i.plot_fbck_current()
     j.plot_log()
     plt.savefig('figures/Fxyz_raw.eps', format='eps')
@@ -70,12 +69,12 @@ for (i, j) in zip(data_polymander.list_polymander, data_force_plate.list_force_p
     j.plot_log()
 
 # training
-X_train = data_polymander.list_polymander[0].fbck_current_data[:, 8:10]
-y_train = data_force_plate.list_force_plates[0].Fxyz[:, 2]
+X_train = data.list_polymander[0].fbck_current_data[:, 8:10]
+y_train = data.list_force_plates[0].Fxyz[:, 2]
 
 # testing
-X_test = data_polymander.list_polymander[1].fbck_current_data[:, 8:10]
-y_test = data_force_plate.list_force_plates[1].Fxyz[:, 2]
+X_test = data.list_polymander[1].fbck_current_data[:, 8:10]
+y_test = data.list_force_plates[1].Fxyz[:, 2]
 
 # Machine Learning - multiple regression
 regr = linear_model.LinearRegression()
@@ -86,8 +85,8 @@ y_pred = regr.predict(X_test)
 
 plt.figure()
 plt.title('Fz prediction')
-plt.plot(data_polymander.list_polymander[1].t_s, y_test, label='true value')
-plt.plot(data_polymander.list_polymander[1].t_s, y_pred, label='pred')
+plt.plot(data.list_polymander[1].t_s, y_test, label='true value')
+plt.plot(data.list_polymander[1].t_s, y_pred, label='pred')
 plt.legend()
 
 # Machine Learning - linear regression
