@@ -5,13 +5,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 
 # Load data
-poly = LoadData(dir_name='logs_polymander/one_limb/FL/amp_0.5_freq_0.5', data_type='poly')
-force_plate = LoadData(dir_name='logs_force_plates/one_limb/FL/amp_0.5_freq_0.5', data_type='force_plate')
+load_data = LoadData()
+load_data.load_polymander_data(dir_name='logs_polymander/one_limb/FL/amp_0.5_freq_0.1')
+load_data.load_force_plates_data(dir_name='logs_force_plates/one_limb/FL/amp_0.5_freq_0.1')
 
-list_X = poly.list_polymander
-list_y = force_plate.list_force_plates
-print(list_X[0].fbck_current_headers)
-print(list_y[0].headers)
+# Store them in a list
+list_X = load_data.list_polymander
+list_y = load_data.list_force_plates
 
 features = list_X[0].fbck_current_headers
 target = list_y[0].headers[3]
@@ -22,9 +22,9 @@ for (i, j) in zip(list_X, list_y):
     i.plot_fbck_current()
     j.plot_log()
     plt.savefig('figures/Fxyz_raw.eps', format='eps')
+
     # 1) Resampling force plate signal based on polymander signal
     j.resample(i.t_s)
-
     # 2) Filter signal
     # i.filtering_signal()
     j.filtering_signal()
@@ -72,6 +72,8 @@ for (i, j) in zip(list_X, list_y):
         check = True
     elif check is True:
         print(np.shape(i.fbck_current_data), np.shape(X))
+        print(np.shape(j.Fxyz[:, 2]), np.shape(y))
+
         X = np.concatenate((X, i.fbck_current_data))
         y = np.concatenate((y, j.Fxyz[:, 2]))
 
@@ -81,12 +83,20 @@ plt.figure()
 plt.plot(X[:, 8:10])
 plt.figure()
 plt.plot(y)
-# Machine learning - linear regression
+# Machine learning - multiple regression
 # Train and test ratio 0.75
-# X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, train_size=0.75)
-# regr = LinearRegression()
-# regr.fit(X_train, y_train)
-# regr.predict(X_test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, train_size=0.75)
+mlr = LinearRegression()
+model = mlr.fit(X_train, y_train)
+print(model.score(X_train, y_train))
+
+y_pred = mlr.predict(X_test)
+
+plt.figure()
+plt.title('Fz prediction')
+plt.plot(y_test[0:500], label='true value')
+plt.plot(y_pred[0:500], label='pred')
+plt.legend()
 
 plt.show()
 
