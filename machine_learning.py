@@ -6,8 +6,8 @@ from sklearn.linear_model import LinearRegression
 
 # Load data
 load_data = LoadData()
-load_data.load_polymander_data(dir_name='logs_polymander/one_limb/FL/amp_0.5_freq_0.1')
-load_data.load_force_plates_data(dir_name='logs_force_plates/one_limb/FL/amp_0.5_freq_0.1')
+load_data.load_polymander_data(dir_name='logs_polymander/one_limb/FL')
+load_data.load_force_plates_data(dir_name='logs_force_plates/one_limb/FL')
 
 # Store them in a list
 list_X = load_data.list_polymander
@@ -16,29 +16,23 @@ list_y = load_data.list_force_plates
 features = list_X[0].fbck_current_headers
 target = list_y[0].headers[3]
 
-# Features engineering
+# Feature engineering
 check = False
 for (i, j) in zip(list_X, list_y):
-    i.plot_fbck_current()
-    j.plot_log()
-    plt.savefig('figures/Fxyz_raw.eps', format='eps')
+    # print(f'Begin analysis of {i.log_name} and {j.log_name}')
 
     # 1) Resampling force plate signal based on polymander signal
     j.resample(i.t_s)
     # 2) Filter signal
     # i.filtering_signal()
     j.filtering_signal()
-    # i.plot_fbck_current()
-    j.plot_log()
-    plt.savefig('figures/fbck_current_sigma_6', format='eps')
-    plt.savefig('figures/Fxyz_sigma_6.eps', format='eps')
 
     # 3) Manage delay
     # 3.1) Detect initial sequence (4 steps)
     # Find minima in roll motor (when the limb touch the force plate)
-    minima = i.detect_initial_sequence(False)
+    minima = i.detect_initial_sequence(i.frequency)
     # Find peaks in force plate (when the limb touch the force plate)
-    peaks = j.detect_initial_sequence(False)
+    peaks = j.detect_initial_sequence(i.frequency)
 
     offset = []
     for k in range(4):
@@ -50,7 +44,7 @@ for (i, j) in zip(list_X, list_y):
     i.cut_signal(0, len(j.t_s))  # remove extra seconds in polymander
     j.t_s = i.t_s  # adjust force plate time on polymander time
 
-    minima = i.detect_initial_sequence(False)
+    minima = i.detect_initial_sequence(i.frequency)
     fig, ax = plt.subplots()
     ax.set_title(j.log_name)
     ax.set(xlabel='time [s]')
@@ -63,17 +57,13 @@ for (i, j) in zip(list_X, list_y):
     # 3.3) Remove initial sequence
     i.cut_signal(minima[4], minima[-1])
     j.cut_signal(minima[4], minima[-1])
-    i.plot_fbck_current()
-    j.plot_log()
+    # print(f'End analysis of {i.log_name} and {j.log_name}')
 
     if check is False:
         X = i.fbck_current_data
         y = j.Fxyz[:, 2]
         check = True
     elif check is True:
-        print(np.shape(i.fbck_current_data), np.shape(X))
-        print(np.shape(j.Fxyz[:, 2]), np.shape(y))
-
         X = np.concatenate((X, i.fbck_current_data))
         y = np.concatenate((y, j.Fxyz[:, 2]))
 
