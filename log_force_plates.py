@@ -1,8 +1,6 @@
 import numpy as np
-import csv
 import matplotlib.pyplot as plt
 from scipy import signal
-from scipy.ndimage import gaussian_filter1d
 import pandas as pd
 
 
@@ -25,16 +23,7 @@ class LogForcePlates():
         self.t_s = df.values[:, 0]
         self.Fxyz = df.values[:, 1:4]
 
-    def cut_signal(self, start, end):
-        start = int(start)
-        end = int(end)
-        self.Fxyz = self.Fxyz[start:end, :]
-        self.t_s = self.t_s[start:end]
-
-    def filtering_signal(self, sigma=6):
-        self.Fxyz = gaussian_filter1d(self.Fxyz, sigma=sigma, axis=0)
-
-    def resample(self, t_poly):
+    def resample_force_plate(self, signal_to_resample, t_poly):
         #print(f'Recording time of robot: [{t_poly[0]}, {t_poly[-1]}]')
         #print(f'Recording time of force plate: [{self.t_s[0]}, {self.t_s[-1]}]')
 
@@ -42,30 +31,17 @@ class LogForcePlates():
         indices = np.where(t_poly > 29)
         nb_steps = int(indices[0][0]*self.t_s[-1]/29)
 
-        self.Fxyz, self.t_s = signal.resample(self.Fxyz, nb_steps, self.t_s)
+        signal_resampled, t_s_resampled = signal.resample(signal_to_resample, nb_steps, self.t_s)
+        return t_s_resampled, signal_resampled
 
-    def detect_initial_sequence(self, frequency, plot=False):
-        # Detect initial sequence (4 steps on the force plate)
-        # Find peaks in force plate
-        ratio = 0.5/frequency
-        peaks, _ = signal.find_peaks(self.Fxyz[:, 2], prominence=1, width=100*ratio, distance=150*ratio)
-        if plot:
-            fig, ax = plt.subplots()
-            ax.plot(self.Fxyz[:, 2], label=self.headers[3])
-            ax.plot(peaks, self.Fxyz[peaks, 2], "x")
-            ax.legend()
-        # print('Fz peaks =', peaks[0:4])
-        return peaks[0:4]
-
-    def plot_log(self):
-        plt.figure()
+    def plot_forces(self, t_s, Fxyz):
+        fig, ax = plt.subplots()
         for i in range(3):
-            plt.plot(self.t_s, self.Fxyz[:, i], label=self.headers[i+1])
+            plt.plot(t_s, Fxyz[:, i], label=self.headers[i+1])
 
-        plt.legend()
-        plt.xlabel('time [s]')
-        plt.ylabel('Force [N]')
-        plt.title(self.log_name)
+        ax.legend()
+        ax.set(xlabel='time [s]', ylabel='Force [N]')
+        ax.set_title(self.log_name)
 
 
 

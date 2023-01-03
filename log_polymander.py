@@ -1,8 +1,5 @@
 import numpy as np
-import csv
 import matplotlib.pyplot as plt
-from scipy import signal
-from scipy.ndimage import gaussian_filter1d
 import pandas as pd
 
 
@@ -57,50 +54,20 @@ class LogPolymander():
             self.t_s[i] = df.values[i][0] - df.values[0][0]\
                           + (df.values[i][1] - df.values[0][1])*1e-6
 
-    def filtering_signal(self, sigma=6):
-        self.goal_position_data = gaussian_filter1d(self.goal_position_data, sigma=sigma, axis=0)
-        self.fbck_position_data = gaussian_filter1d(self.fbck_position_data, sigma=sigma, axis=0)
-        self.fbck_current_data = gaussian_filter1d(self.fbck_current_data, sigma=sigma, axis=0)
-        self.fbck_voltage_data = gaussian_filter1d(self.fbck_voltage_data, sigma=sigma, axis=0)
-        self.goal_torque_body_data = gaussian_filter1d(self.goal_torque_body_data, sigma=sigma, axis=0)
-
-
-    def cut_signal(self, start, end):
-        start = int(start)
-        end = int(end)
-        self.t_s = self.t_s[start:end]
-        self.goal_position_data = self.goal_position_data[start:end, :]
-        self.fbck_position_data = self.fbck_position_data[start:end, :]
-        self.fbck_current_data = self.fbck_current_data[start:end, :]
-        self.fbck_voltage_data = self.fbck_voltage_data[start:end, :]
-        self.goal_torque_body_data = self.goal_torque_body_data[start:end, :]
-
-    def detect_initial_sequence(self, frequency, plot=False):
-        ratio = 0.5/frequency
-        minima, _ = signal.find_peaks(-self.fbck_position_data[:, 9], prominence=-0.5, width=100*ratio, distance=150*ratio)
-        if plot:
-            fig, ax = plt.subplots()
-            ax.plot(self.fbck_position_data[:, 9], label=self.fbck_position_headers[9])
-            ax.plot(minima, self.fbck_position_data[minima, 9], "x")
-            plt.legend()
-        # print('Fbck pos. minima =', minima[0:4])
-        return minima
-
-    def plot_goal_position(self):
-        self.plot_limbs(self.goal_position_data, self.goal_position_headers)
+    def plot_goal_position(self, t_s, goal_position):
+        self.plot_limbs(t_s, goal_position, self.goal_position_headers)
         #self.plot_spine(self.goal_position_data, self.goal_position_headers)
 
-    def plot_fbck_position(self):
-        self.plot_limbs(self.fbck_position_data, self.fbck_position_headers)
+    def plot_fbck_position(self, t_s, fbck_position):
+        self.plot_limbs(t_s, fbck_position, self.fbck_position_headers)
         #self.plot_spine(self.fbck_position_data, self.fbck_position_headers)
 
-    def plot_fbck_current(self):
-        self.plot_limbs(self.fbck_current_data, self.fbck_current_headers)
+    def plot_fbck_current(self, t_s, fbck_current):
+        self.plot_limbs(t_s, fbck_current, self.fbck_current_headers)
         #self.plot_spine(self.fbck_current_data, self.fbck_current_headers)
 
-
-    def plot_fbck_voltage(self):
-        self.plot_limbs(self.fbck_voltage_data, self.fbck_voltage_headers)
+    def plot_fbck_voltage(self, t_s, fbck_voltage):
+        self.plot_limbs(t_s, fbck_voltage, self.fbck_voltage_headers)
         #self.plot_spine(self.fbck_voltage_data, self.fbck_voltage_headers)
 
     def plot_goal_body_torque(self):
@@ -113,24 +80,24 @@ class LogPolymander():
         ax.plot(self.t_s, self.fbck_current_data[:, i]*1e-3, label=self.fbck_current_headers[i])
         ax.legend()
 
-    def plot_limbs(self, data, headers):
+    def plot_limbs(self, t_s, data, headers):
         # plot limbs joints (motors ID: 9-16)
         fig, axs = plt.subplots(2, 2, sharex=True, sharey=True)
         fig.suptitle(self.log_name)
         for i in [8, 9]:
-            axs[0, 0].plot(self.t_s, data[:, i], label=headers[i])
+            axs[0, 0].plot(t_s, data[:, i], label=headers[i])
             axs[0, 0].set_title('Front left limb')
 
         for i in [10, 11]:
-            axs[0, 1].plot(self.t_s, data[:, i], label=headers[i])
+            axs[0, 1].plot(t_s, data[:, i], label=headers[i])
             axs[0, 1].set_title('Front right limb')
 
         for i in [12, 13]:
-            axs[1, 0].plot(self.t_s, data[:, i], label=headers[i])
+            axs[1, 0].plot(t_s, data[:, i], label=headers[i])
             axs[1, 0].set_title('Hind left limb')
 
         for i in [14, 15]:
-            axs[1, 1].plot(self.t_s, data[:, i], label=headers[i])
+            axs[1, 1].plot(t_s, data[:, i], label=headers[i])
             axs[1, 1].set_title('Hind right limb')
 
         for ax in axs.flat:
