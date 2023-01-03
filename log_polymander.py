@@ -23,6 +23,7 @@ class LogPolymander():
         self.goal_torque_body_headers = None
         self.num_motors = 16
         self.num_body_motors = 8
+        self.frequency = None
 
         self.parse_log()
 
@@ -31,6 +32,7 @@ class LogPolymander():
         params = pd.read_csv(f'{self.dir_path}/{self.log_name}', nrows=1)
         print('-----------Parameters of polymander-------------')
         print(params)
+        self.frequency = params.values[0, 3]
 
         # load time [s], goal position [rad], feedback position [rad], feedback current [mA],
         # feedback voltage [V] and goal torque body [mA] of polymander motors
@@ -73,12 +75,13 @@ class LogPolymander():
         self.fbck_voltage_data = self.fbck_voltage_data[start:end, :]
         self.goal_torque_body_data = self.goal_torque_body_data[start:end, :]
 
-    def detect_initial_sequence(self, plot=False):
-        minima, _ = signal.find_peaks(-self.fbck_position_data[:, 9], prominence=-0.5, width=100, distance=100)
+    def detect_initial_sequence(self, frequency, plot=False):
+        ratio = 0.5/frequency
+        minima, _ = signal.find_peaks(-self.fbck_position_data[:, 9], prominence=-0.5, width=100*ratio, distance=150*ratio)
         if plot:
-            plt.figure()
-            plt.plot(self.fbck_position_data[:, 9], label=self.fbck_position_headers[9])
-            plt.plot(minima, self.fbck_position_data[minima, 9], "x")
+            fig, ax = plt.subplots()
+            ax.plot(self.fbck_position_data[:, 9], label=self.fbck_position_headers[9])
+            ax.plot(minima, self.fbck_position_data[minima, 9], "x")
             plt.legend()
         # print('Fbck pos. minima =', minima[0:4])
         return minima

@@ -38,10 +38,9 @@ for (i, j) in zip(data.list_polymander, data.list_force_plates):
     # 3) Manage delay
     # 3.1) Detect initial sequence (4 steps)
     # Find minima in roll motor (when the limb touch the force plate)
-    minima = i.detect_initial_sequence(False)
+    minima = i.detect_initial_sequence(i.frequency)
     # Find peaks in force plate (when the limb touch the force plate)
-    peaks = j.detect_initial_sequence(False)
-
+    peaks = j.detect_initial_sequence(i.frequency)
     offset = []
     for k in range(4):
         offset.append(peaks[k]-minima[k])
@@ -52,7 +51,7 @@ for (i, j) in zip(data.list_polymander, data.list_force_plates):
     i.cut_signal(0, len(j.t_s))  # remove extra seconds in polymander
     j.t_s = i.t_s  # adjust force plate time on polymander time
 
-    minima = i.detect_initial_sequence(False)
+    minima = i.detect_initial_sequence(i.frequency)
     fig, ax = plt.subplots()
     ax.set_title(j.log_name)
     ax.set(xlabel='time [s]')

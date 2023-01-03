@@ -38,25 +38,22 @@ class LogForcePlates():
         #print(f'Recording time of robot: [{t_poly[0]}, {t_poly[-1]}]')
         #print(f'Recording time of force plate: [{self.t_s[0]}, {self.t_s[-1]}]')
 
-        # Find number of samples in 60 s in robot data
-        index = 0
-        for _ in t_poly:
-            if t_poly[index] >= self.t_s[-1]:
-                nb_steps = index + 1
-                break
-            index += 1
-        #print(f'Recording time of robot when cut: [{self.t_s[0]}, {t_poly[nb_steps - 1]}]')
+        # Find number of samples in 29 s in robot data and convert to total number of force plate seconds
+        indices = np.where(t_poly > 29)
+        nb_steps = int(indices[0][0]*self.t_s[-1]/29)
 
         self.Fxyz, self.t_s = signal.resample(self.Fxyz, nb_steps, self.t_s)
 
-    def detect_initial_sequence(self, plot=False):
+    def detect_initial_sequence(self, frequency, plot=False):
         # Detect initial sequence (4 steps on the force plate)
         # Find peaks in force plate
-        peaks, _ = signal.find_peaks(self.Fxyz[:, 2], prominence=1, width=100)  # or height=4, distance=200
+        ratio = 0.5/frequency
+        peaks, _ = signal.find_peaks(self.Fxyz[:, 2], prominence=1, width=100*ratio, distance=150*ratio)
         if plot:
-            plt.figure()
-            plt.plot(self.Fxyz[:, 2], label=self.headers[2])
-            plt.plot(peaks, self.Fxyz[peaks, 2], "x")
+            fig, ax = plt.subplots()
+            ax.plot(self.Fxyz[:, 2], label=self.headers[3])
+            ax.plot(peaks, self.Fxyz[peaks, 2], "x")
+            ax.legend()
         # print('Fz peaks =', peaks[0:4])
         return peaks[0:4]
 
