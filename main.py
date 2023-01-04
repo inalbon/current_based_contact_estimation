@@ -1,28 +1,28 @@
 import matplotlib.pyplot as plt
 from load_data import LoadData
 import numpy as np
+from feature_engineering import *
 
+data = LoadData()
 
 # load polymander data
-data_polymander = LoadData(dir_name='logs_polymander/four_limbs/FL')
-data_polymander.load_polymander_data()
+data.load_polymander_data(dir_name='logs_polymander/four_limbs/FL')
 
 # load force plates data
-data_force_plates = LoadData(dir_name='logs_force_plates/four_limbs/FL')
-data_force_plates.load_force_plates_data()
+data.load_force_plates_data(dir_name='logs_force_plates/four_limbs/FL')
 
 # Signal processing
-data_force_plates = data_force_plates.list_force_plates[0]
-data_polymander = data_polymander.list_polymander[0]
+data_force_plates = data.list_force_plates[0]
+data_polymander = data.list_polymander[0]
 frequency_poly = len(data_polymander.t_s)/data_polymander.t_s[-1]
 frequency_force_plate = len(data_force_plates.t_s)/data_force_plates.t_s[-1]
 
 plt.figure()
-data_force_plates.plot_log()
+data_force_plates.plot_forces(data_force_plates.t_s, data_force_plates.Fxyz)
 
 # filtering signal from force plate
-data_force_plates.filtering_signal()
-data_force_plates.plot_log()
+filtered_Fxyz = filtering_signal(data_force_plates.Fxyz)
+data_force_plates.plot_forces(data_force_plates.t_s, filtered_Fxyz)
 
 # manage delay between force plate and polymander
 start_recording_force_plate = 10*60*60+29*60+50 - 15

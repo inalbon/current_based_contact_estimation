@@ -71,14 +71,26 @@ def manage_delay_between_poly_and_fp(t_s_poly, fbck_position, fbck_current, t_s_
     # remove first seconds in force plate signal
     t_s_fp_cut_start = cut_time(t_s_fp, delay, delay + len(t_s_poly))
     Fxyz_cut_start = cut_signal(Fxyz, delay, delay + len(t_s_poly))
+
     # remove extra seconds in polymander
     t_s_poly_cut_end = cut_time(t_s_poly, 0, len(t_s_fp_cut_start))
     fbck_position_cut_end = cut_signal(fbck_position, 0, len(t_s_fp_cut_start))
     fbck_current_cut_end = cut_signal(fbck_current, 0, len(t_s_fp_cut_start))
+
     # adjust time on polymander time
     t_s_aligned = t_s_poly_cut_end
 
     return t_s_aligned, fbck_position_cut_end, fbck_current_cut_end, Fxyz_cut_start
+
+
+def remove_inital_sequence(t_s, fbck_position, fbck_current, Fxyz, frequency):
+    minima = detect_minima_of_Fz(fbck_position, frequency)
+    t_s_final = cut_time(t_s, minima[4], minima[-1])
+    fbck_position_final = cut_signal(fbck_position, minima[4], minima[-1])
+    fbck_current_final = cut_signal(fbck_current, minima[4], minima[-1])
+    Fxyz_final = cut_signal(Fxyz, minima[4], minima[-1])
+
+    return t_s_final, fbck_position_final, fbck_current_final, Fxyz_final
 
 
 def plot_aligned_signals(t_s, fbck_position, Fxyz, frequency):
@@ -92,10 +104,3 @@ def plot_aligned_signals(t_s, fbck_position, Fxyz, frequency):
     ax.legend(loc='upper right')
 
 
-def remove_inital_sequence(t_s, fbck_position, fbck_current, Fxyz, frequency):
-    minima = detect_minima_of_Fz(fbck_position, frequency)
-    t_s_final = cut_time(t_s, minima[4], minima[-1])
-    fbck_current_final = cut_signal(fbck_current, minima[4], minima[-1])
-    Fxyz_final = cut_signal(Fxyz, minima[4], minima[-1])
-
-    return t_s_final, fbck_current_final, Fxyz_final

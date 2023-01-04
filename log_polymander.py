@@ -27,8 +27,6 @@ class LogPolymander():
     def parse_log(self):
         # load parameters of polymander
         params = pd.read_csv(f'{self.dir_path}/{self.log_name}', nrows=1)
-        print('-----------Parameters of polymander-------------')
-        print(params)
         self.frequency = params.values[0, 3]
 
         # load time [s], goal position [rad], feedback position [rad], feedback current [mA],
@@ -56,19 +54,19 @@ class LogPolymander():
 
     def plot_goal_position(self, t_s, goal_position):
         self.plot_limbs(t_s, goal_position, self.goal_position_headers)
-        #self.plot_spine(self.goal_position_data, self.goal_position_headers)
+        # self.plot_spine(self.goal_position_data, self.goal_position_headers)
 
     def plot_fbck_position(self, t_s, fbck_position):
         self.plot_limbs(t_s, fbck_position, self.fbck_position_headers)
-        #self.plot_spine(self.fbck_position_data, self.fbck_position_headers)
+        # self.plot_spine(self.fbck_position_data, self.fbck_position_headers)
 
     def plot_fbck_current(self, t_s, fbck_current):
         self.plot_limbs(t_s, fbck_current, self.fbck_current_headers)
-        #self.plot_spine(self.fbck_current_data, self.fbck_current_headers)
+        # self.plot_spine(self.fbck_current_data, self.fbck_current_headers)
 
     def plot_fbck_voltage(self, t_s, fbck_voltage):
         self.plot_limbs(t_s, fbck_voltage, self.fbck_voltage_headers)
-        #self.plot_spine(self.fbck_voltage_data, self.fbck_voltage_headers)
+        # self.plot_spine(self.fbck_voltage_data, self.fbck_voltage_headers)
 
     def plot_goal_body_torque(self):
         self.plot_spine(self.goal_torque_body_data, self.goal_torque_body_headers)
