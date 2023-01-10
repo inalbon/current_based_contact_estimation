@@ -4,6 +4,29 @@ from scipy import signal
 import numpy as np
 
 
+def signal_processing(poly, force_plate):
+    # 1) Filter signal
+    fbck_current_filtered = filtering_signal(poly.fbck_current_data, 10)
+    Fxyz_filtered = filtering_signal(force_plate.Fxyz, 20)
+
+    # 2) Resampling force plate signal based on polymander signal
+    t_s_fp_resampled, Fxyz_resampled = force_plate.resample_force_plate(Fxyz_filtered, poly.t_s)
+
+    # 3) Manage delay
+    t_s_cut, fbck_position_cut, fbck_current_cut, Fxyz_cut = manage_delay_between_poly_and_fp(poly.t_s,
+                                                                                              poly.fbck_position_data,
+                                                                                              fbck_current_filtered,
+                                                                                              t_s_fp_resampled,
+                                                                                              Fxyz_resampled,
+                                                                                              poly.frequency)
+
+    # 4) Remove initial sequence
+    t_s_final, fbck_position_final, fbck_current_final, Fxyz_final = remove_inital_sequence(t_s_cut, fbck_position_cut,
+                                                                                            fbck_current_cut,
+                                                                                            Fxyz_cut, poly.frequency)
+    return t_s_final, fbck_position_final, fbck_current_final, Fxyz_final
+
+
 def filtering_signal(signal, sigma=6):
     filtered_signal = gaussian_filter1d(signal, sigma=sigma, axis=0)
     return filtered_signal

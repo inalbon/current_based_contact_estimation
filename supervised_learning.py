@@ -24,33 +24,16 @@ for folder in list_folder:
     load_data = LoadData()
     load_data.load_polymander_data(dir_name=f'logs_polymander/one_limb/FL/{folder}')
     load_data.load_force_plates_data(dir_name=f'logs_force_plates/one_limb/FL/{folder}')
-    print(f'{len(load_data.list_polymander)} files loaded for polymander and'
+    print(f'{len(load_data.list_polymander)} files loaded for polymander and '
           f'{len(load_data.list_force_plates)} files loaded for force plate')
 
     # -------------------------------- Feature engineering ----------------------------
     check = False
     for (i, j) in zip(load_data.list_polymander, load_data.list_force_plates):
-        # 1) Filter signal
-        fbck_current_filtered = filtering_signal(i.fbck_current_data, 10)
-        Fxyz_filtered = filtering_signal(j.Fxyz, 20)
+        # Signal processing
+        t_s_final, fbck_position_final, fbck_current_final, Fxyz_final = signal_processing(i, j)
 
-        # 2) Resampling force plate signal based on polymander signal
-        t_s_fp_resampled, Fxyz_resampled = j.resample_force_plate(Fxyz_filtered, i.t_s)
-
-        # 3) Manage delay
-        t_s_cut, fbck_position_cut, fbck_current_cut, Fxyz_cut = manage_delay_between_poly_and_fp(i.t_s,
-                                                                                                  i.fbck_position_data,
-                                                                                                  fbck_current_filtered,
-                                                                                                  t_s_fp_resampled,
-                                                                                                  Fxyz_resampled,
-                                                                                                  i.frequency)
-
-        # 4) Remove initial sequence
-        t_s_final, fbck_position_final, fbck_current_final, Fxyz_final = remove_inital_sequence(t_s_cut, fbck_position_cut,
-                                                                                                fbck_current_cut,
-                                                                                                Fxyz_cut, i.frequency)
-
-        # 5) Store data in X and y
+        # Store data in X and y
         if check is False:
             X = fbck_current_final[:, 8:10]
             y = Fxyz_final[:, 2]
@@ -139,6 +122,7 @@ for folder in list_folder:
     mse = mean_squared_error(y_test, y_pred)
     rmse = np.sqrt(mse)
     mae = mean_absolute_error(y_test, y_pred)
+    print(f'mlr metrics : [R^2, MSE, RMSE, MAE] = [{r2:.2f}, {mse:.2f}, {rmse:.2f}, {mae:.2f}]')
 
     # Store values for each folder in a list
     list_r2.append(r2)

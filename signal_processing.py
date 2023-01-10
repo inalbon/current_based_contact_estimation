@@ -5,8 +5,8 @@ from sklearn import linear_model
 
 # load data
 data = LoadData()
-data.load_polymander_data(dir_name='logs_polymander/one_limb/FL/amp_0.5_freq_0.5', log_name='robot_data_log_2022-12-23_18_47_54')
-data.load_force_plates_data(dir_name='logs_force_plates/one_limb/FL/amp_0.5_freq_0.5', log_name='exp2_amp_0.5_freq_0.5')
+data.load_polymander_data(dir_name='logs_polymander/one_limb/FL/amp_0.35_freq_0.5', log_name='robot_data_log_2022-12-23_17_28_23')
+data.load_force_plates_data(dir_name='logs_force_plates/one_limb/FL/amp_0.35_freq_0.5', log_name='exp1_amp_0.35_freq_0.5')
 
 i = data.list_polymander[0]
 j = data.list_force_plates[0]
@@ -18,6 +18,7 @@ j.plot_forces(j.t_s, j.Fxyz)
 fbck_current_filtered = filtering_signal(i.fbck_current_data, 10)
 Fxyz_filtered = filtering_signal(j.Fxyz, 20)
 
+i.plot_fbck_position(i.t_s[0:4000], i.fbck_position_data[0:4000, :])
 i.plot_fbck_current(i.t_s, fbck_current_filtered)
 j.plot_forces(j.t_s, Fxyz_filtered)
 
