@@ -127,3 +127,57 @@ def plot_aligned_signals(t_s, fbck_position, Fxyz, frequency):
     ax.legend(loc='upper right')
 
 
+def plot_3d_metrics(metrics, metric_name):  # metrics (kfolds x 9)
+    metrics = np.array(metrics)
+
+    results = np.mean(metrics, 1)
+    errors = abs(np.max(metrics, 1) - np.min(metrics, 1))
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.set_xlabel('Amplitude [rad]', labelpad=10)
+    ax.set_ylabel('Frequency [Hz]', labelpad=10)
+    ax.set_zlabel(metric_name)
+
+    xlabels = np.array(['0.2', '0.35', '0.5'])
+    ylabels = np.array(['0.1', '0.5', '1.0'])
+
+    x, y = np.random.rand(2, 100) * 3
+    hist, xedges, yedges = np.histogram2d(x, y, bins=3, range=[[0, 3], [0, 3]])
+
+    # Construct arrays for the anchor positions of the 9 bars.
+    xpos, ypos = np.meshgrid(xedges[:-1] + 0.25, yedges[:-1] + 0.25, indexing="ij")
+
+    xpos = xpos.ravel()
+    ypos = ypos.ravel()
+    zpos = 0
+
+    # Construct arrays with the dimensions for the 9 bars.
+    dx = dy = 0.5 * np.ones_like(zpos)
+    dz = results
+
+    # Set ticks
+    ax.w_xaxis.set_ticks(ypos[0:3] + dx / 2.)
+    ax.w_xaxis.set_ticklabels(xlabels)
+
+    ax.w_yaxis.set_ticks(ypos[0:3] + dy / 2.)
+    ax.w_yaxis.set_ticklabels(ylabels)
+
+    # Set colors
+    values = np.linspace(0.2, 1., xpos.ravel().shape[0])
+    colors = cm.rainbow(values)
+
+    # Plot 3D bars
+    ax.bar3d(xpos, ypos, zpos, dx, dy, dz, alpha=0.6, color=colors)
+
+    # Plot error bars
+    x_error = [[x + dx] * 3 for x in range(3)]
+    x_error = [item for sublist in x_error for item in sublist]
+    y_error = [(y + dy) % 3 for y in range(9)]
+
+    for (i, j, k, e) in zip(x_error, y_error, dz, errors):
+        ax.errorbar(i, j, k, e, color='black', capsize=4)
+
+    ax.view_init(30, 130)
+
+
