@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from scipy.ndimage import gaussian_filter1d
 from scipy import signal
 import numpy as np
@@ -21,7 +22,7 @@ def signal_processing(poly, force_plate):
                                                                                               poly.frequency)
 
     # 4) Remove initial sequence
-    t_s_final, fbck_position_final, fbck_current_final, Fxyz_final = remove_inital_sequence(t_s_cut, fbck_position_cut,
+    t_s_final, fbck_position_final, fbck_current_final, Fxyz_final = remove_initial_sequence(t_s_cut, fbck_position_cut,
                                                                                             fbck_current_cut,
                                                                                             Fxyz_cut, poly.frequency)
     return t_s_final, fbck_position_final, fbck_current_final, Fxyz_final
@@ -106,7 +107,7 @@ def manage_delay_between_poly_and_fp(t_s_poly, fbck_position, fbck_current, t_s_
     return t_s_aligned, fbck_position_cut_end, fbck_current_cut_end, Fxyz_cut_start
 
 
-def remove_inital_sequence(t_s, fbck_position, fbck_current, Fxyz, frequency):
+def remove_initial_sequence(t_s, fbck_position, fbck_current, Fxyz, frequency):
     minima = detect_minima_of_Fz(fbck_position, frequency)
     t_s_final = cut_time(t_s, minima[4], minima[-1])
     fbck_position_final = cut_signal(fbck_position, minima[4], minima[-1])
