@@ -179,7 +179,8 @@ for list_amp in list_list_amp:
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     ax.scatter(X_train[:, 0], X_train[:, 1], y_train)
-    ax.plot(X_train[:, 0], X_train[:, 1], mlr.coef_[0]*X_train[:, 0] + mlr.coef_[1]*X_train[:, 1] + mlr.intercept_, 'r', label='$R^2 = %.2f$' % r2)
+    ax.plot(X_train[:, 0], X_train[:, 1], mlr.coef_[0]*X_train[:, 0] + mlr.coef_[1]*X_train[:, 1] + mlr.intercept_, 'r',
+            label='$R^2 = %.2f$' % r2)
     ax.set(xlabel='8FbckCurrent [mA]', ylabel='9FbckCurrent [mA]', zlabel='Fz [N]')
     ax.legend()
 
