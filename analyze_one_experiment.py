@@ -43,7 +43,8 @@ plt.savefig('figures/signal_processing/current9_filtered.eps', format='eps')
 
 
 # 2) Resampling force plate signal based on polymander signal
-t_s_fp_resampled, Fxyz_resampled = j.resample_force_plate(Fxyz_filtered, i.t_s)
+t_s_fp_resampled, Fxyz_resampled = resample_signal(Fxyz_filtered, j.t_s, i.t_s)
+j.plot_forces(t_s_fp_resampled, Fxyz_resampled)
 
 # 3) Manage delay between polymander and force plate
 t_s_cut, fbck_position_cut, fbck_current_cut, Fxyz_cut = manage_delay_between_poly_and_fp(i.t_s, i.fbck_position_data,
@@ -55,7 +56,7 @@ plot_aligned_signals(t_s_cut, fbck_position_cut, Fxyz_cut, i.frequency)
 plt.savefig('figures/signal_processing/initial_sequence.eps', format='eps')
 
 # 4) Remove initial sequence
-t_s_final, fbck_position_final, fbck_current_final, Fxyz_final = remove_inital_sequence(t_s_cut, fbck_position_cut,
+t_s_final, fbck_position_final, fbck_current_final, Fxyz_final = remove_initial_sequence(t_s_cut, fbck_position_cut,
                                                                                         fbck_current_cut, Fxyz_cut,
                                                                                         i.frequency)
 
@@ -69,7 +70,5 @@ for ax in ax.flat:
 plt.savefig('figures/signal_processing/crop_data.eps', format='eps')
 
 
-X = fbck_current_final[:, 8:10]
-Y = Fxyz_final[:, 2]
 
 plt.show()
