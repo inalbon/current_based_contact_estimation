@@ -5,13 +5,13 @@ from scipy import signal
 import numpy as np
 
 
-def signal_processing(poly, force_plate):
+def signal_processing(poly, force_plate):  # prepare data for training
     # 1) Filter signal
     fbck_current_filtered = filtering_signal(poly.fbck_current_data, 10)
     Fxyz_filtered = filtering_signal(force_plate.Fxyz, 20)
 
     # 2) Resampling force plate signal based on polymander signal
-    t_s_fp_resampled, Fxyz_resampled = force_plate.resample_force_plate(Fxyz_filtered, poly.t_s)
+    t_s_fp_resampled, Fxyz_resampled = resample_signal(Fxyz_filtered, force_plate.t_s, poly.t_s)
 
     # 3) Manage delay
     t_s_cut, fbck_position_cut, fbck_current_cut, Fxyz_cut = manage_delay_between_poly_and_fp(poly.t_s,
@@ -31,6 +31,22 @@ def signal_processing(poly, force_plate):
 def filtering_signal(signal, sigma=6):
     filtered_signal = gaussian_filter1d(signal, sigma=sigma, axis=0)
     return filtered_signal
+
+
+def resample_signal(signal_to_resample, time_to_resample, time_wanted):
+    print(f'Recording time of robot: [{time_wanted[0]}, {time_wanted[-1]}]')
+    print(f'Recording time of force plate: [{time_to_resample[0]}, {time_to_resample[-1]}]')
+    print(f'sizes {np.shape(signal_to_resample)}, {np.shape(time_to_resample)}, {np.shape(time_wanted)}')
+
+    # Find number of samples in robot data and convert to corresponding number of samples wanted in force plate
+    nb_steps = int(len(time_wanted)*time_to_resample[-1]/time_wanted[-1])
+    print(f'size before {len(time_to_resample)}, after {nb_steps}')
+
+    # Resampling
+    signal_resampled, t_s_resampled = signal.resample(signal_to_resample, nb_steps, time_to_resample)
+    print(f'sizes resampled {np.shape(t_s_resampled)}, {np.shape(signal_resampled)}')
+    print(t_s_resampled[-1])
+    return t_s_resampled, signal_resampled
 
 
 def cut_time(t_s, start, end):

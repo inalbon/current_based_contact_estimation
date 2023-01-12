@@ -23,17 +23,6 @@ class LogForcePlates():
         self.t_s = df.values[:, 0]
         self.Fxyz = df.values[:, 1:4]
 
-    def resample_force_plate(self, signal_to_resample, t_poly):
-        #print(f'Recording time of robot: [{t_poly[0]}, {t_poly[-1]}]')
-        #print(f'Recording time of force plate: [{self.t_s[0]}, {self.t_s[-1]}]')
-
-        # Find number of samples in 29 s in robot data and convert to total number of force plate seconds
-        indices = np.where(t_poly > 29)
-        nb_steps = int(indices[0][0]*self.t_s[-1]/29)
-
-        signal_resampled, t_s_resampled = signal.resample(signal_to_resample, nb_steps, self.t_s)
-        return t_s_resampled, signal_resampled
-
     def plot_forces(self, t_s, Fxyz):
         fig, ax = plt.subplots()
         for i in range(3):
