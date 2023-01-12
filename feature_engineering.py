@@ -34,18 +34,17 @@ def filtering_signal(signal, sigma=6):
 
 
 def resample_signal(signal_to_resample, time_to_resample, time_wanted):
-    print(f'Recording time of robot: [{time_wanted[0]}, {time_wanted[-1]}]')
-    print(f'Recording time of force plate: [{time_to_resample[0]}, {time_to_resample[-1]}]')
-    print(f'sizes {np.shape(signal_to_resample)}, {np.shape(time_to_resample)}, {np.shape(time_wanted)}')
-
     # Find number of samples in robot data and convert to corresponding number of samples wanted in force plate
     nb_steps = int(len(time_wanted)*time_to_resample[-1]/time_wanted[-1])
-    print(f'size before {len(time_to_resample)}, after {nb_steps}')
 
+    # period = []
+    # for i in range(len(time_to_resample)-1):
+    #     period.append(time_to_resample[i+1] - time_to_resample[i])
+    # print('is period of polymander reliable ?', period)  # answer no -> t_s_resampled is false when t_s_polymander
     # Resampling
+
     signal_resampled, t_s_resampled = signal.resample(signal_to_resample, nb_steps, time_to_resample)
-    print(f'sizes resampled {np.shape(t_s_resampled)}, {np.shape(signal_resampled)}')
-    print(t_s_resampled[-1])
+
     return t_s_resampled, signal_resampled
 
 
@@ -142,6 +141,35 @@ def plot_aligned_signals(t_s, fbck_position, Fxyz, frequency):
     ax.plot(t_s, fbck_position[:, 9], label='9FbckPosition [rad]')
     ax.vlines(t_s[minima[0:4]], 0, max(Fxyz[:, 2]), colors='lime', linestyles='dashed', label='first 4 steps')
     ax.legend(loc='upper right')
+
+
+def subplots_currents_and_forces(t_s, hip_current, calf_current, Fz):
+    fig, axs = plt.subplots(3, 1, sharex=True)
+    axs[0].plot(t_s, Fz, label='Fz')
+    axs[0].set(xlabel='time [s]', ylabel='Force [N]')
+    axs[1].plot(t_s, hip_current, label='Hip motor')
+    axs[1].set(xlabel='time [s]', ylabel='Current [mA]')
+    axs[2].plot(t_s, calf_current, label='Calf motor')
+    axs[2].set(xlabel='time [s]', ylabel='Current [mA]')
+    for ax in axs.flat:
+        ax.legend()
+        ax.label_outer()
+
+
+def plot_3d_curents_time(t_s, hip_current, calf_current):
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.set_title('Currents vs time')
+    ax.plot(hip_current, calf_current, t_s)
+    ax.set(xlabel='8FbckCurrent [mA]', ylabel='9FbckCurrent [mA]', zlabel='time [s]')
+
+
+def plot_3d_currents_force(Fz, hip_current, calf_current):
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.set_title('Currents vs force')
+    ax.plot(hip_current, calf_current, Fz)
+    ax.set(xlabel='8FbckCurrent [mA]', ylabel='9FbckCurrent [mA]', zlabel='Fz [N]')
 
 
 def plot_3d_metrics(metrics, metric_name):  # metrics (kfolds x 9)

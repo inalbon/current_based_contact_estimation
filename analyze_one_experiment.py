@@ -57,8 +57,8 @@ plt.savefig('figures/signal_processing/initial_sequence.eps', format='eps')
 
 # 4) Remove initial sequence
 t_s_final, fbck_position_final, fbck_current_final, Fxyz_final = remove_initial_sequence(t_s_cut, fbck_position_cut,
-                                                                                        fbck_current_cut, Fxyz_cut,
-                                                                                        i.frequency)
+                                                                                         fbck_current_cut, Fxyz_cut,
+                                                                                         i.frequency)
 
 fig, ax = plt.subplots(2, sharex=True)
 ax[0].plot(t_s_final, fbck_current_final[:, 8:10], label=i.fbck_current_headers[8:10])
@@ -68,6 +68,16 @@ ax[1].set(xlabel='time [s]', ylabel='Force [N]')
 for ax in ax.flat:
     ax.legend()
 plt.savefig('figures/signal_processing/crop_data.eps', format='eps')
+
+# Plot 3 subplots with current8 current9 and Fz
+subplots_currents_and_forces(t_s_final, fbck_current_final[:, 8], fbck_current_final[:, 9], Fxyz_final[:, 2])
+
+# Plot 3d currents vs time
+plot_3d_curents_time(t_s_final, fbck_current_final[:, 8], fbck_current_final[:, 9])
+
+# Plot 3d currents vs force
+plot_3d_currents_force(Fxyz_final[:, 2], fbck_current_final[:, 8], fbck_current_final[:, 9])
+
 
 
 
