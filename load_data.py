@@ -22,7 +22,7 @@ class LoadData():
         else:
             log_name = f'{log_name}.csv'
             self.list_polymander.append(LogPolymander(dir_path, log_name))
-            print(f'File {log_name} has been loaded')
+            print(f'File {log_name} in folder {dir_name} has been loaded')
 
     def load_force_plates_data(self, dir_name, log_name=None):
         dir_path = join(f"{dirname(realpath(__file__))}/{dir_name}")
@@ -35,5 +35,5 @@ class LoadData():
         else:
             log_name = f'{log_name}.txt'
             self.list_force_plates.append(LogForcePlates(dir_path, log_name))
-            print(f'File {log_name} has been loaded')
+            print(f'File {log_name} in folder {dir_name} has been loaded')
 
