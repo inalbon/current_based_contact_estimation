@@ -165,6 +165,7 @@ def manage_delay_between_poly_and_fp(t_s_poly, fbck_position, fbck_current, t_s_
     :param frequency: frequency at which polymander makes a step
     :return: time, fbck positions, fbck currents and forces with same number of steps and aligned
     """
+
     # 1) Find delay between polymander and force plate
     delay = compute_delay_between_poly_and_force_plate(fbck_position, Fxyz, frequency)
 

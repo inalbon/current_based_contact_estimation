@@ -1,5 +1,5 @@
 """
-Created on Mon Dec 26 09:17:03 2022
+Created on Mon Jan 02 10:17:45 2022
 
 @author: Malika In-Albon
 """
@@ -10,8 +10,8 @@ from feature_engineering_utils import *
 
 # Load data
 data = LoadData()
-data.load_polymander_data(dir_name='logs_polymander/one_limb/FL/amp_0.5_freq_0.5', log_name='robot_data_log_2022-12-23_18_47_54')
-data.load_force_plates_data(dir_name='logs_force_plates/one_limb/FL/amp_0.5_freq_0.5', log_name='exp2_amp_0.5_freq_0.5')
+data.load_polymander_data(dir_name='logs_polymander/static/FL/amp_0.5_freq_0.5', log_name='robot_data_log_2022-12-23_18_47_54')
+data.load_force_plates_data(dir_name='logs_force_plates/static/FL/amp_0.5_freq_0.5', log_name='exp2_amp_0.5_freq_0.5')
 
 i = data.list_polymander[0]
 j = data.list_force_plates[0]

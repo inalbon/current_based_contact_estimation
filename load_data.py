@@ -12,11 +12,10 @@ from log_polymander import LogPolymander
 
 
 class LoadData:
-    # load files of a folder and store them in a list
     def __init__(self):
         """
-        Class LoadData creates one list containing the polymander object and
-        one list containing force plate objects
+        Class LoadData reads through a directory and creates one list containing
+        the polymander object and one list containing force plate objects
         :param dir_path: directory path of the file to be loaded
         :param log_name: name of the file to be loaded
         """

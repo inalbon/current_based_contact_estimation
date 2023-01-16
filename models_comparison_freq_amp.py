@@ -27,8 +27,8 @@ list_metrics_name = ['R2', 'MSE', 'RMSE', 'MAE']
 for folder in list_folder:
     # -------------------------------- Load data ----------------------------------------
     load_data = LoadData()
-    load_data.load_polymander_data(dir_name=f'logs_polymander/one_limb/FL/{folder}')
-    load_data.load_force_plates_data(dir_name=f'logs_force_plates/one_limb/FL/{folder}')
+    load_data.load_polymander_data(dir_name=f'logs_polymander/static/FL/{folder}')
+    load_data.load_force_plates_data(dir_name=f'logs_force_plates/static/FL/{folder}')
     print(f'{len(load_data.list_polymander)} files in list_polymander')
     print(f'{len(load_data.list_force_plates)} files in list_force_plate')
 

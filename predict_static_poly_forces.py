@@ -26,8 +26,8 @@ list_metrics_name = ['MSE', 'RMSE', 'MAE']
 # Static polymander for prediction
 poly_static_FL = LoadData()
 for folder in list_folder:
-    poly_static_FL.load_polymander_data(dir_name=f'logs_polymander/one_limb/FL/prediction/{folder}')
-    poly_static_FL.load_force_plates_data(dir_name=f'logs_force_plates/one_limb/FL/prediction/{folder}')
+    poly_static_FL.load_polymander_data(dir_name=f'logs_polymander/static/FL/prediction/{folder}')
+    poly_static_FL.load_force_plates_data(dir_name=f'logs_force_plates/static/FL/prediction/{folder}')
 print(f'{len(poly_static_FL.list_polymander)} files in list_polymander')
 print(f'{len(poly_static_FL.list_force_plates)} files in list_force_plate')
 

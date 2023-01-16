@@ -58,7 +58,7 @@ for (i, j) in zip(poly_walking_FL.list_polymander, poly_walking_FL.list_force_pl
     # Plot prediction of Fz when polymander is walking
     fig, ax = plt.subplots()
     ax.set_title('Prediction of Fz with hip and calf motors')
-    ax.plot(t_s_final, y_test, label='true value')
+    #ax.plot(t_s_final, y_test, label='true value')
     ax.plot(t_s_final, y_pred, label='pred')
     ax.set(xlabel='time [s]', ylabel='Fz [N]')
     ax.legend()
